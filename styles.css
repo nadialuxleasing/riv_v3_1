@@ -1,0 +1,321 @@
+/* ==========================================================================
+   LUX VISION ·
+   --------------------------------------------------------------------------
+   Índice:
+     1 · Tokens          (fuente, tracking, acentos)  ← CAMBIAR FUENTES ACA
+     2 · Base            (tipografía global, selección, scrollbars)
+     3 · Encabezado      (degradado + fila de KPIs, más bajo que antes)
+     4 · Controles       (selectores, botones, dropdowns)
+     5 · Ficha técnica
+     6 · Panel de estadísticas
+     7 · Leyenda
+     8 · Popups del mapa
+     9 · Responsive
+   ========================================================================== */
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   1 · TOKENS
+   ══════════════════════════════════════════════════════════════════════ */
+:root {
+    /* Fuente única para todo el visor. Para cambiarla, basta reemplazar
+       este valor (y el <link> de Google Fonts en index.html). */
+    --font-ui: "Inter", sans-serif;
+
+    /* Tracking: etiquetas en mayúsculas vs. cifras grandes */
+    --tracking-label: 0.09em;    /* KPI labels, títulos de dropdown */
+    --tracking-num: -0.015em;    /* cifras: ligeramente cerrado */
+
+    /* Acento institucional (aparece en degradado, selección, foco) */
+    --accent: #5a9cf2;
+
+    /* Alturas del encabezado: 46 + 46 = 92px (antes 106px) */
+    --header-row-h: 46px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   2 · BASE
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Tipografía global. Las cifras usan formato tabular para que los KPI
+   no "bailen" al actualizarse. */
+body, button, input, select, textarea {
+    font-family: var(--font-ui) !important;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+::selection {
+    background: rgba(90, 156, 242, 0.35);
+}
+
+/* Scrollbars discretas en paneles con scroll */
+.sidebar-scroll::-webkit-scrollbar,
+#stats-content::-webkit-scrollbar {
+    width: 6px;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb,
+#stats-content::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.35);
+    border-radius: 999px;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb:hover,
+#stats-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.55);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   3 · ENCABEZADO
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Degradado oscuro con dos halos de acento muy sutiles.
+   Se mantiene sobrio: nada de gradientes llamativos. */
+#main-header {
+    background:
+        radial-gradient(900px 140% at 15% -60%, rgba(90, 156, 242, 0.14), transparent 55%),
+        radial-gradient(700px 140% at 85% -60%, rgba(34, 211, 238, 0.07), transparent 55%),
+        linear-gradient(98deg, #05070d 0%, #0a1120 42%, #0c1526 68%, #070b14 100%) !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14) !important;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+}
+:root:not(.dark) #main-header {
+    background:
+        radial-gradient(900px 140% at 15% -60%, rgba(90, 156, 242, 0.16), transparent 55%),
+        linear-gradient(98deg, #0b1220 0%, #13233f 50%, #0b1220 100%) !important;
+}
+
+/* ── Módulos KPI ── */
+
+/* Contenedor de cada KPI + su dropdown */
+.kpi-module-wrap {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+
+/* Separador punteado entre módulos */
+.kpi-module-wrap::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 24%;
+    height: 52%;
+    border-left: 1px dotted rgba(255, 255, 255, 0.16);
+}
+.kpi-module-wrap:first-of-type::before { display: none; }
+
+/* El botón KPI en sí: sin caja, solo tipografía */
+.kpi-module {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 18px;
+    min-width: 96px;
+    cursor: pointer;
+    gap: 1px;
+    color: inherit;
+}
+.kpi-module:hover { background: rgba(255, 255, 255, 0.025) !important; }
+
+/* "TODAS" es solo una etiqueta: la centramos verticalmente */
+#btn-mod-todos .kpi-label { padding-top: 8px; }
+
+/* Cifra grande */
+.kpi-number {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    letter-spacing: var(--tracking-num) !important;
+    color: #f1f5f9 !important;
+    transition: color 0.15s ease;
+}
+
+/* Etiqueta pequeña en mayúsculas con aire entre letras */
+.kpi-label {
+    font-size: 8px !important;
+    font-weight: 600 !important;
+    letter-spacing: var(--tracking-label) !important;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.38) !important;
+    transition: color 0.15s ease;
+}
+
+/* Estados on/off (controlados desde app.js) */
+#main-header .kpi-module.layer-button-off .kpi-number { color: rgba(255, 255, 255, 0.18) !important; }
+#main-header .kpi-module.layer-button-off .kpi-label  { color: rgba(255, 255, 255, 0.14) !important; }
+#main-header .kpi-module.layer-button-on  .kpi-number { color: #ffffff !important; }
+#main-header .kpi-module.layer-button-on  .kpi-label  { color: rgba(255, 255, 255, 0.55) !important; }
+
+/* Hover: ilumina número y etiqueta del módulo completo */
+.kpi-module-wrap:hover .kpi-number { color: #ffffff !important; }
+.kpi-module-wrap:hover .kpi-label  { color: rgba(255, 255, 255, 0.6) !important; }
+
+/* El dropdown se abre con CSS puro: hover sobre el wrapper */
+.kpi-module-wrap:hover > .dropdown-content { display: block !important; }
+
+/* Botón de filtro por tecnología activo */
+.lum-category.is-active {
+    border-color: rgba(34, 211, 238, 0.5) !important;
+    background: rgba(34, 211, 238, 0.06);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   4 · CONTROLES (fila superior del header)
+   ══════════════════════════════════════════════════════════════════════ */
+
+#map-style-select {
+    background: transparent !important;
+    border: none !important;
+    color: #e2e8f0 !important;
+    font-size: 11px !important;
+    letter-spacing: 0.01em;
+}
+#map-style-select option { background: #0a0e1a; color: #e2e8f0; }
+
+#theme-toggle {
+    background: transparent !important;
+    border: none !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+#theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
+}
+
+#filtro-distrito {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #cbd5e1 !important;
+}
+#filtro-distrito option { background: #0a0e1a; color: #e2e8f0; }
+
+#btn-stats {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+#btn-stats:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+}
+
+/* Títulos y filas de los dropdowns de KPI */
+.dropdown-title {
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.dropdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   5 · FICHA TÉCNICA
+   ══════════════════════════════════════════════════════════════════════ */
+
+#technical-sidebar {
+    background-color: #f8f9fa !important;
+    border-color: #e2e8f0 !important;
+    color: #1e293b !important;
+}
+#technical-sidebar > div:first-child { border-color: #e2e8f0 !important; }
+#technical-sidebar h3 { color: #1b2a47 !important; }
+
+/* Etiqueta / valor reutilizables (los IDs de label se renombran por capa) */
+.ficha-label {
+    display: block;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 2px;
+}
+.ficha-valor {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: #334155;
+    letter-spacing: 0;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   6 · PANEL DE ESTADÍSTICAS
+   (los estilos de las barras internas viajan en el HTML generado por app.js)
+   ══════════════════════════════════════════════════════════════════════ */
+
+#stats-panel { will-change: transform; }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   7 · LEYENDA
+   ══════════════════════════════════════════════════════════════════════ */
+
+#legend-panel { font-size: 11.5px; }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   8 · POPUPS DEL MAPA
+   ══════════════════════════════════════════════════════════════════════ */
+
+.dark .maplibregl-popup-content {
+    background: #051c63 !important;
+    color: #e7edf3 !important;
+    border: 1px solid #0b2c82;
+}
+.dark .maplibregl-popup-anchor-top .maplibregl-popup-tip {
+    border-bottom-color: #040d3d !important;
+}
+html:not(.dark) .maplibregl-popup-content {
+    background: #ffffff !important;
+    color: #020410 !important;
+    border: 1px solid #e7edf3;
+}
+html:not(.dark) .maplibregl-popup-anchor-top .maplibregl-popup-tip {
+    border-bottom-color: #ffffff !important;
+}
+
+/* Tipografía dentro de los popups generados por app.js */
+.maplibregl-popup-content { font-family: var(--font-ui) !important; }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   9 · RESPONSIVE
+   ══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1180px) {
+    .kpi-module { padding: 4px 13px; min-width: 84px; }
+    .kpi-number { font-size: 13px !important; }
+}
+@media (max-width: 900px) {
+    .kpi-module { padding: 4px 9px; min-width: 72px; }
+    .kpi-number { font-size: 12px !important; }
+    .kpi-label  { font-size: 7.5px !important; }
+}
+@media (max-width: 700px) {
+    .kpi-module { padding: 4px 6px; min-width: 58px; }
+    .kpi-number { font-size: 11.5px !important; }
+    .kpi-label  { font-size: 7px !important; letter-spacing: 0.05em !important; }
+}
